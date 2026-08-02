@@ -103,7 +103,7 @@
           <article class="panel chat-panel">
             <div class="chat-toolbar"><label>Testing Agent<select id="chat-agent-select"></select></label><div id="chat-agent-summary" class="status-copy"></div></div>
             <div id="chat-messages" class="chat-messages" aria-live="polite"></div>
-            <form id="chat-form" class="chat-input"><textarea name="message" required maxlength="10000" placeholder="Ask this Agent a question…"></textarea><button class="primary" type="submit">Send</button></form>
+            <form id="chat-form" class="chat-input"><textarea name="message" required maxlength="10000" placeholder="Ask this Agent a question…"></textarea><button class="primary" type="submit"><span id="chat-send-text">Send</span><span id="chat-send-spinner" class="spinner hidden" aria-hidden="true"></span></button></form>
           </article>
         </section>
         <section id="view-users" class="view">
