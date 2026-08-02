@@ -1,0 +1,66 @@
+business-ai-platform/
+│
+├── apps/
+│   ├── web/
+│   │   ├── app/
+│   │   ├── components/
+│   │   ├── features/
+│   │   └── lib/
+│   │
+│   └── api/
+│       ├── api/
+│       ├── core/
+│       ├── models/
+│       ├── schemas/
+│       ├── services/
+│       └── repositories/
+│
+├── packages/
+│   ├── agent-runtime/
+│   │   ├── runtime/
+│   │   ├── models/
+│   │   ├── prompts/
+│   │   ├── memory/
+│   │   ├── rag/
+│   │   ├── tools/
+│   │   ├── workflows/
+│   │   └── guardrails/
+│   │
+│   └── shared/
+│
+├── workers/
+│   ├── ingestion/
+│   └── execution/
+│
+├── tests/
+│   ├── unit/
+│   ├── integration/
+│   └── e2e/
+│
+├── infrastructure/
+│   ├── docker/
+│   └── migrations/
+│
+├── docs/
+│   ├── architecture/
+│   ├── api/
+│   └── decisions/
+│
+├── docker-compose.yml
+└── README.md
+
+
+AGENT
+"What am I?"
+
+KNOWLEDGE
+"What do I know?"
+
+TOOLS
+"What can I do?"
+
+WORKFLOW
+"How should I reason and act?"
+
+RUNTIME
+"How is all of this executed?"

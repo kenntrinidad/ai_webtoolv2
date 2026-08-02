@@ -1,0 +1,281 @@
+You are a Senior Full-Stack Python Engineer and Security-Focused Software Architect.
+
+Extend the existing AI Agent Builder application with secure User Management and Authentication.
+
+Current application stack:
+- Python, FastAPI, Pydantic, SQLAlchemy
+- SQLite for local MVP, PostgreSQL-ready architecture
+- HTML, CSS, vanilla JavaScript admin interface
+- Existing database models for Agents, Personas, and Knowledge Documents
+- Existing FastAPI routes and browser administration UI
+
+Do not rewrite the current application. Add the new module cleanly, following the current modular architecture.
+
+Main objective:
+Implement login, user accounts, password management, and role-based access control so only Admin users can manage users.
+
+Functional requirements:
+
+1. User model
+Create a User database model with at minimum:
+
+- id
+- username
+- email
+- full_name
+- password_hash
+- role
+- status
+- must_change_password
+- created_at
+- updated_at
+- last_login_at
+
+Use roles:
+- admin
+- user
+
+Use statuses:
+- active
+- inactive
+
+Username and email must be unique.
+
+2. Initial admin account
+Provide a secure bootstrap mechanism for the first Admin account.
+
+Use environment variables such as:
+- INITIAL_ADMIN_USERNAME
+- INITIAL_ADMIN_EMAIL
+- INITIAL_ADMIN_PASSWORD
+
+Do not hardcode any password in source code.
+
+Create the initial Admin only when no Admin account exists.
+
+3. Login module
+Create a login interface and API.
+
+Required behavior:
+- User logs in using username or email and password.
+- Inactive users cannot log in.
+- Invalid credentials must return a generic message such as “Invalid username/email or password.”
+- Do not reveal whether a user exists.
+- Create an authenticated session using a secure mechanism appropriate for the local MVP.
+- Prefer signed, HTTP-only cookies or secure JWT handling.
+- Add logout functionality.
+- Protect authenticated pages and APIs.
+
+4. Default password for created users
+Only an Admin can create a user.
+
+When creating a user:
+- The Admin may provide a temporary/default password.
+- Store only a secure password hash.
+- Set must_change_password = true.
+- On the user’s first successful login, require the user to change their password before accessing the main application.
+- Never return password hashes through APIs or the UI.
+- Do not use a shared hardcoded default password.
+
+5. Password management
+Add a “Change Password” feature for authenticated users.
+
+Requirements:
+- User must enter current password.
+- User enters and confirms a new password.
+- Enforce reasonable password validation:
+  - minimum 12 characters
+  - at least one uppercase letter
+  - at least one lowercase letter
+  - at least one number
+- After password change:
+  - update password_hash
+  - set must_change_password = false
+  - invalidate old sessions if feasible
+- Admin must not be able to read another user’s password.
+
+6. Admin User Management
+Create an Admin-only User Management module.
+
+Only role=admin can:
+- View all users
+- Create users
+- Edit user profile details
+- Change a user’s role
+- Activate a user
+- Deactivate a user
+- Delete a user
+- Reset a user password to a new temporary password
+
+Rules:
+- Inactive users cannot access the system.
+- Deactivated users must have their current sessions invalidated if possible.
+- Admin cannot delete or deactivate the final remaining active Admin user.
+- Prevent an Admin from accidentally removing their own final Admin privileges.
+- Regular users must not see User Management navigation or endpoints.
+
+7. Authorization
+Create reusable authorization dependencies/services.
+
+Examples:
+- get_current_user()
+- require_authenticated_user()
+- require_admin_user()
+
+Do not repeat role checks across every route manually.
+
+Protect existing functionality:
+- All existing Agent, Persona, Knowledge, Sync, and Chat API routes require an authenticated user.
+- User Management routes require Admin role.
+- Hide the User Management navigation item from non-Admin users.
+
+For this MVP, users can access the shared system data after login. Design the code so organization-level data isolation can be added later.
+
+8. API endpoints
+Create REST endpoints similar to:
+
+Authentication:
+- POST /api/auth/login
+- POST /api/auth/logout
+- GET /api/auth/me
+- POST /api/auth/change-password
+
+Admin user management:
+- POST /api/users
+- GET /api/users
+- GET /api/users/{id}
+- PUT /api/users/{id}
+- POST /api/users/{id}/activate
+- POST /api/users/{id}/deactivate
+- POST /api/users/{id}/reset-password
+- DELETE /api/users/{id}
+
+Adjust endpoint design where needed while keeping REST conventions.
+
+9. Frontend
+Add the following pages/views:
+
+Login page:
+- Username/email field
+- Password field
+- Login button
+- Clear safe validation messages
+
+Forced password-change page:
+- Current password
+- New password
+- Confirm password
+- Save password button
+
+Admin User Management page:
+- User list table
+- Username
+- Email
+- Full name
+- Role
+- Status
+- Last login
+- Actions
+
+Admin actions:
+- Create User
+- Edit User
+- Activate
+- Deactivate
+- Reset Password
+- Delete User
+
+Only display this page and its navigation item for Admin users.
+
+10. Security requirements
+Follow these rules strictly:
+
+- Use a secure password hashing library such as bcrypt or Argon2.
+- Never store plain-text passwords.
+- Never log passwords, tokens, or password hashes.
+- Use HTTP-only cookies for browser sessions.
+- Use Secure cookies in production.
+- Use SameSite protections.
+- Add CSRF protection if using cookie authentication for state-changing requests.
+- Add login rate limiting or a simple login-attempt protection strategy.
+- Return safe errors without stack traces.
+- Validate all user input with Pydantic.
+- Keep authentication, authorization, password hashing, routes, and database logic in separate modules.
+
+11. Suggested project structure
+Use or extend this structure:
+
+app/
+  api/
+    auth.py
+    users.py
+  core/
+    security.py
+    database.py
+    config.py
+  models/
+    user.py
+  schemas/
+    auth.py
+    user.py
+  services/
+    auth_service.py
+    user_service.py
+    password_service.py
+  static/
+    css/
+    js/
+  tests/
+    test_auth_api.py
+    test_users_api.py
+    test_authorization.py
+
+12. Automated tests
+Use pytest and add tests for at minimum:
+
+- Initial Admin bootstrap
+- Admin login
+- Invalid login
+- Inactive user cannot log in
+- User creation by Admin
+- Non-Admin cannot create users
+- Non-Admin cannot access user-management endpoints
+- Admin can deactivate/reactivate users
+- Deactivated user loses access
+- Password hashing
+- Forced password change
+- Password update validation
+- Password reset flow
+- Final active Admin cannot be deleted or deactivated
+- Protected existing API endpoints require authentication
+
+Mock only external services where needed. Do not make external API calls during tests.
+
+13. Development method
+Do not implement everything in one large step.
+
+Before generating code:
+- Review the existing project architecture.
+- Identify compatibility risks with existing routes and frontend.
+- Show the proposed files to be created or modified.
+- Explain the authentication approach you recommend.
+
+Then implement incrementally in phases:
+
+PHASE A: User model, password hashing, and initial Admin bootstrap
+PHASE B: Login, logout, session authentication, and protected-route dependencies
+PHASE C: Password change and forced temporary-password flow
+PHASE D: Admin User Management APIs and role authorization
+PHASE E: User Management frontend and login UI
+PHASE F: Security hardening, regression tests, documentation, and deployment updates
+
+For every phase:
+- Explain what is being built.
+- Show files being created or changed.
+- Provide complete working code.
+- Provide installation or migration commands if needed.
+- Add relevant tests.
+- Provide manual testing instructions.
+- Wait for my confirmation before proceeding to the next phase.
+
+Start with PHASE A only.

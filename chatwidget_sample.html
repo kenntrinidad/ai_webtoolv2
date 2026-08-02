@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chat Widget Example</title>
+  <style>
+    :root {
+      --primary-color: #0076ff;
+      --bg-color: #ffffff;
+      --text-color: #333333;
+      --shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background-color: #f5f7fb;
+      margin: 0;
+      padding: 20px;
+    }
+
+    /* 1. Chat Launcher (FAB) */
+    .chat-launcher {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      width: 56px;
+      height: 56px;
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+      border-radius: 50%;
+      cursor: pointer;
+      box-shadow: var(--shadow);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.2s ease, background-color 0.2s ease;
+      z-index: 9999;
+    }
+
+    .chat-launcher:hover {
+      transform: scale(1.05);
+      background-color: #0060d6;
+    }
+
+    .chat-launcher:active {
+      transform: scale(0.95);
+    }
+
+    .chat-launcher .icon-close {
+      display: none;
+    }
+
+    /* Toggle states for launcher icons */
+    .chat-launcher.active .icon-chat {
+      display: none;
+    }
+
+    .chat-launcher.active .icon-close {
+      display: flex;
+    }
+
+    /* 2. Chat Window Container */
+    .chat-window {
+      position: fixed;
+      bottom: 96px;
+      right: 24px;
+      width: 360px;
+      height: 500px;
+      max-height: calc(100vh - 120px);
+      background-color: var(--bg-color);
+      border-radius: 16px;
+      box-shadow: var(--shadow);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      z-index: 9999;
+      
+      /* Animation states */
+      opacity: 0;
+      transform: translateY(20px) scale(0.95);
+      pointer-events: none;
+      transition: opacity 0.25s ease, transform 0.25s ease;
+    }
+
+    .chat-window.open {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+      pointer-events: all;
+    }
+
+    /* 3. Chat Window Layout Components */
+    .chat-header {
+      background-color: var(--primary-color);
+      color: white;
+      padding: 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .chat-header h3 {
+      margin: 0;
+      font-size: 16px;
+    }
+
+    .chat-body {
+      flex: 1;
+      padding: 16px;
+      overflow-y: auto;
+      background-color: #f9fafb;
+    }
+
+    .message {
+      margin-bottom: 12px;
+      padding: 10px 14px;
+      border-radius: 12px;
+      max-width: 75%;
+      font-size: 14px;
+      line-height: 1.4;
+    }
+
+    .message.bot {
+      background-color: #f0f0f0;
+      color: var(--text-color);
+      align-self: flex-start;
+    }
+
+    .chat-footer {
+      padding: 12px;
+      border-top: 1px solid #eaeaea;
+      display: flex;
+      gap: 8px;
+    }
+
+    .chat-footer input {
+      flex: 1;
+      padding: 10px 14px;
+      border: 1px solid #d1d1d1;
+      border-radius: 20px;
+      outline: none;
+      font-size: 14px;
+    }
+
+    .chat-footer input:focus {
+      border-color: var(--primary-color);
+    }
+
+    .chat-footer button {
+      background: none;
+      border: none;
+      color: var(--primary-color);
+      font-weight: bold;
+      cursor: pointer;
+      padding: 0 8px;
+    }
+
+    /* Mobile Responsiveness */
+    @media (max-width: 480px) {
+      .chat-window {
+        bottom: 0;
+        right: 0;
+        width: 100%;
+        height: 100%;
+        max-height: 100%;
+        border-radius: 0;
+      }
+      .chat-window.open {
+        transform: translateY(0);
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Your Website Content</h1>
+  <p>Scroll down or resize the page. The chat launcher will remain floating at the bottom right corner.</p>
+
+  <!-- Chat Window -->
+  <div id="chatWindow" class="chat-window" aria-hidden="true">
+    <div class="chat-header">
+      <div style="width: 10px; height: 10px; background: #22c55e; border-radius: 50%;"></div>
+      <h3>Chat Assistant</h3>
+    </div>
+    <div class="chat-body">
+      <div class="message bot">Hello! How can I help you today?</div>
+    </div>
+    <div class="chat-footer">
+      <input type="text" placeholder="Type a message..." aria-label="Type your message">
+      <button type="button">Send</button>
+    </div>
+  </div>
+
+  <!-- Chat Launcher -->
+  <button 
+    id="chatLauncher" 
+    class="chat-launcher" 
+    aria-label="Open chat window" 
+    aria-controls="chatWindow" 
+    aria-expanded="false"
+  >
+    <!-- Chat Icon (Speech Bubble) -->
+    <svg class="icon-chat" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+    </svg>
+    <!-- Close Icon (X) -->
+    <svg class="icon-close" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <line x1="18" y1="6" x2="6" y2="18"></line>
+      <line x1="6" y1="6" x2="18" y2="18"></line>
+    </svg>
+  </button>
+
+  <script>
+    const launcher = document.getElementById('chatLauncher');
+    const windowEl = document.getElementById('chatWindow');
+
+    launcher.addEventListener('click', () => {
+      // Toggle CSS classes
+      const isOpen = windowEl.classList.toggle('open');
+      launcher.classList.toggle('active');
+
+      // Accessibility updates
+      launcher.setAttribute('aria-expanded', isOpen);
+      windowEl.setAttribute('aria-hidden', !isOpen);
+
+      // Change screen reader label text based on state
+      if (isOpen) {
+        launcher.setAttribute('aria-label', 'Close chat window');
+        // Optional: Auto-focus the input box when chat opens
+        windowEl.querySelector('input').focus();
+      } else {
+        launcher.setAttribute('aria-label', 'Open chat window');
+      }
+    });
+  </script>
+
+</body>
+</html>

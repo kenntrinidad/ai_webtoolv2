@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>AI Agent Builder</title>
+    <link rel="stylesheet" href="/static/css/app.css">
+  </head>
+  <body>
+    <main id="login-screen" class="auth-screen">
+      <section class="auth-card">
+        <a class="auth-brand" href="/"><span class="brand-mark">A</span><span>Agent Builder</span></a>
+        <p class="eyebrow">WELCOME BACK</p>
+        <h1>Sign in to your workspace</h1>
+        <p class="auth-copy">Use the account created by your administrator.</p>
+        <form id="login-form" novalidate>
+          <label>Username or email<input id="login-identifier" name="identifier" required autocomplete="username" placeholder="admin or you@example.com"></label>
+          <label>Password<input id="login-password" name="password" type="password" required autocomplete="current-password" placeholder="Enter your password"></label>
+          <p id="login-error" class="auth-error" role="alert"></p>
+          <button class="primary" type="submit">Sign in</button>
+        </form>
+      </section>
+    </main>
+    <main id="password-screen" class="auth-screen" hidden>
+      <section class="auth-card">
+        <a class="auth-brand" href="/"><span class="brand-mark">A</span><span>Agent Builder</span></a>
+        <p class="eyebrow">SECURITY UPDATE</p>
+        <h1>Create your new password</h1>
+        <p class="auth-copy">Your account requires a password update before you can use the workspace.</p>
+        <form id="password-change-form" novalidate>
+          <label>Current password<input name="current_password" type="password" required autocomplete="current-password"></label>
+          <label>New password<input name="new_password" type="password" required minlength="12" autocomplete="new-password"></label>
+          <p class="password-hint">Use at least 12 characters with uppercase, lowercase, and a number.</p>
+          <p id="password-error" class="auth-error" role="alert"></p>
+          <button class="primary" type="submit">Update password</button>
+        </form>
+      </section>
+    </main>
+    <div id="app-shell" class="app-shell" hidden>
+      <aside class="sidebar">
+        <a class="brand" href="#dashboard"><span class="brand-mark">A</span><span>Agent Builder</span></a>
+        <nav class="nav" aria-label="Main navigation">
+          <button class="nav-link active" data-view="dashboard">Dashboard</button>
+          <button class="nav-link" data-view="agents">Agents</button>
+          <button class="nav-link" data-view="personas">Personas</button>
+          <button class="nav-link" data-view="knowledge">Knowledge</button>
+          <button class="nav-link" data-view="chat">Chat</button>
+        <button class="nav-link" data-view="users">Users</button>
+        </nav>
+        <a class="docs-link" href="/docs" target="_blank" rel="noreferrer">API documentation ↗</a>
+      </aside>
+      <main class="main-content">
+        <header class="page-header">
+          <div><p class="eyebrow">AI OPERATIONS</p><h1 id="page-title">Dashboard</h1></div>
+          <div class="header-actions"><span id="health-indicator" class="health">Checking service…</span><button id="logout-button" class="secondary" type="button">Sign out</button></div>
+        </header>
+
+        <section id="view-dashboard" class="view active">
+          <div class="metric-grid">
+            <article class="metric"><span>Agents</span><strong id="agent-count">—</strong><small id="active-agent-count">— active</small></article>
+            <article class="metric"><span>Personas</span><strong id="persona-count">—</strong><small>Reusable instructions</small></article>
+            <article class="metric"><span>Knowledge</span><strong id="document-count">—</strong><small>Uploaded documents</small></article>
+          </div>
+          <article class="panel hero-panel"><div><p class="eyebrow">START HERE</p><h2>Configure an AI agent</h2><p>Create a reusable Persona, attach it to an Agent, then upload and synchronize that Agent’s private knowledge.</p></div><button class="primary" data-view="agents">Create Agent</button></article>
+        </section>
+
+        <section id="view-agents" class="view">
+          <div class="section-heading"><div><h2>Agents</h2><p>Identity, status, and Persona assignment.</p></div><button class="primary" id="new-agent">New Agent</button></div>
+          <div class="two-column"><article class="panel list-panel"><div id="agents-list" class="item-list"></div></article>
+            <article class="panel form-panel"><h3 id="agent-form-title">Create Agent</h3><form id="agent-form">
+              <label>Agent Name<input name="name" required maxlength="120" placeholder="Customer Support Agent"></label>
+              <label>Nickname<input name="nickname" maxlength="120" placeholder="JARVIS"></label>
+              <label>Description<textarea name="description" maxlength="2000" placeholder="What does this agent do?"></textarea></label>
+              <label>Persona<select name="persona_id" id="agent-persona-select"><option value="">No Persona assigned</option></select></label>
+              <label>Status<select name="status"><option value="active">Active</option><option value="inactive">Inactive</option></select></label>
+              <div class="form-actions"><button class="primary" type="submit">Save Agent</button><button class="secondary" id="cancel-agent" type="button">Cancel</button></div>
+            </form></article>
+          </div>
+        </section>
+
+        <section id="view-personas" class="view">
+          <div class="section-heading"><div><h2>Personas</h2><p>Reusable behavioral instructions shared by multiple Agents.</p></div><button class="primary" id="new-persona">New Persona</button></div>
+          <div class="two-column"><article class="panel list-panel"><div id="personas-list" class="item-list"></div></article>
+            <article class="panel form-panel"><h3 id="persona-form-title">Create Persona</h3><form id="persona-form">
+              <label>Persona Name<input name="name" required maxlength="120" placeholder="Professional Support"></label>
+              <label>Description<textarea name="description" maxlength="2000" placeholder="Short description"></textarea></label>
+              <label>System Instructions<textarea name="system_prompt" required maxlength="20000" class="large" placeholder="Answer clearly and politely. Use verified knowledge."></textarea></label>
+              <div class="form-actions"><button class="primary" type="submit">Save Persona</button><button class="secondary" id="cancel-persona" type="button">Cancel</button></div>
+            </form></article>
+          </div>
+        </section>
+
+        <section id="view-knowledge" class="view">
+          <div class="section-heading"><div><h2>Knowledge Base</h2><p>Upload documents and explicitly synchronize an Agent’s private knowledge.</p></div></div>
+          <article class="panel"><div class="toolbar"><label>Agent<select id="knowledge-agent-select"></select></label><button class="secondary" id="sync-knowledge">Sync Knowledge</button></div>
+            <form id="upload-form" class="upload-row"><input type="file" name="file" required accept=".pdf,.txt,.md,.markdown,.docx"><button class="primary" type="submit">Upload Document</button></form>
+            <div id="knowledge-status" class="status-copy"></div><div id="documents-list" class="document-list"></div>
+          </article>
+        </section>
+
+        <section id="view-chat" class="view">
+          <div class="section-heading"><div><h2>Agent Testing Playground</h2><p>Test an Agent’s identity, Persona, and synchronized knowledge.</p></div></div>
+          <article class="panel chat-panel">
+            <div class="chat-toolbar"><label>Testing Agent<select id="chat-agent-select"></select></label><div id="chat-agent-summary" class="status-copy"></div></div>
+            <div id="chat-messages" class="chat-messages" aria-live="polite"></div>
+            <form id="chat-form" class="chat-input"><textarea name="message" required maxlength="10000" placeholder="Ask this Agent a question…"></textarea><button class="primary" type="submit">Send</button></form>
+          </article>
+        </section>
+        <section id="view-users" class="view">
+          <div class="section-heading"><div><h2>Users</h2><p>Manage administrator and regular workspace users.</p></div><button class="primary" id="new-user">New User</button></div>
+          <div class="two-column">
+            <article class="panel list-panel"><div id="users-list" class="item-list"></div></article>
+            <article class="panel form-panel"><h3 id="user-form-title">Create User</h3><form id="user-form">
+              <label>Username<input name="username" required maxlength="120" placeholder="username"></label>
+              <label>Email<input name="email" type="email" required maxlength="320" placeholder="user@example.com"></label>
+              <label>Full name<input name="full_name" maxlength="200" placeholder="Optional full name"></label>
+              <label>Password<input name="password" type="password" minlength="12" placeholder="Choose a secure password"></label>
+              <p class="form-help">Leave password blank when editing an existing user to keep the current password.</p>
+              <label>Role<select name="role"><option value="user">User</option><option value="admin">Admin</option></select></label>
+              <label>Status<select name="status"><option value="active">Active</option><option value="inactive">Inactive</option></select></label>
+              <label class="checkbox"><input type="checkbox" name="must_change_password"> Require password change on next login</label>
+              <div class="form-actions"><button class="primary" type="submit">Save User</button><button class="secondary" id="cancel-user" type="button">Cancel</button></div>
+            </form></article>
+          </div>
+        </section>
+      </main>
+    </div>
+    <div id="toast" class="toast" role="status"></div>
+    <script src="/static/js/app.js"></script>
+  </body>
+</html>

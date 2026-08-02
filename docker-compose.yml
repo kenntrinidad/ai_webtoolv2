@@ -1,0 +1,12 @@
+services:
+  ai-agent-builder:
+    build: .
+    env_file: .env
+    ports:
+      - "8000:8000"
+    volumes:
+      - ai_agent_builder_storage:/app/storage
+    restart: unless-stopped
+
+volumes:
+  ai_agent_builder_storage:
