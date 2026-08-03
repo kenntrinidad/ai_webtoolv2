@@ -23,7 +23,32 @@ function editAgent(id) { const agent = state.agents.find(item => item.id === id)
 function editPersona(id) { const persona = state.personas.find(item => item.id === id); const form = $('#persona-form'); form.dataset.editId = id; form.name.value = persona.name; form.description.value = persona.description || ''; form.system_prompt.value = persona.system_prompt; $('#persona-form-title').textContent = 'Edit Persona'; }
 function editUser(id) { const user = state.users.find(item => item.id === id); const form = $('#user-form'); form.dataset.editId = id; form.username.value = user.username; form.email.value = user.email; form.full_name.value = user.full_name || ''; form.password.value = ''; form.role.value = user.role; form.status.value = user.status; form.must_change_password.checked = user.must_change_password; $('#user-form-title').textContent = 'Edit User'; }
 document.querySelectorAll('[data-view]').forEach(button => button.addEventListener('click', () => setView(button.dataset.view)));
-$('#agent-form').addEventListener('submit', async event => { event.preventDefault(); const form = event.currentTarget; const data = Object.fromEntries(new FormData(form)); data.persona_id ||= null; data.nickname ||= null; data.description ||= null; data.max_tokens = Number.parseInt(data.max_tokens || '512', 10); data.temperature = Number.parseFloat(data.temperature || '0.7'); try { await api(form.dataset.editId ? `/agents/${form.dataset.editId}` : '/agents', {method: form.dataset.editId ? 'PUT':'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(data)}); toast('Agent saved'); resetForm(form); $('#agent-form-title').textContent = 'Create Agent'; refreshAgents(); } catch (error) { toast(error.message, true); } });
+$('#agent-form').addEventListener('submit', async event => {
+  event.preventDefault();
+  const form = event.currentTarget;
+  const data = Object.fromEntries(new FormData(form));
+  data.persona_id ||= null;
+  data.nickname ||= null;
+  data.description ||= null;
+  data.max_tokens = Number.parseInt(data.max_tokens || '512', 10);
+  data.temperature = Number.parseFloat(String(data.temperature).trim());
+  if (!Number.isFinite(data.temperature)) {
+    data.temperature = 0.7;
+  }
+  try {
+    await api(form.dataset.editId ? `/agents/${form.dataset.editId}` : '/agents', {
+      method: form.dataset.editId ? 'PUT' : 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(data),
+    });
+    toast('Agent saved');
+    resetForm(form);
+    $('#agent-form-title').textContent = 'Create Agent';
+    refreshAgents();
+  } catch (error) {
+    toast(error.message, true);
+  }
+});
 $('#persona-form').addEventListener('submit', async event => { event.preventDefault(); const form = event.currentTarget; const data = Object.fromEntries(new FormData(form)); data.description ||= null; try { await api(form.dataset.editId ? `/personas/${form.dataset.editId}` : '/personas', {method: form.dataset.editId ? 'PUT':'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(data)}); toast('Persona saved'); resetForm(form); $('#persona-form-title').textContent = 'Create Persona'; refreshPersonas(); } catch (error) { toast(error.message, true); } });
 $('#cancel-agent').onclick = () => { resetForm($('#agent-form')); $('#agent-form-title').textContent = 'Create Agent'; }; $('#cancel-persona').onclick = () => { resetForm($('#persona-form')); $('#persona-form-title').textContent = 'Create Persona'; };
 $('#new-agent').onclick = () => $('#cancel-agent').click(); $('#new-persona').onclick = () => $('#cancel-persona').click();

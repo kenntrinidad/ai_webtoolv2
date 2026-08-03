@@ -36,6 +36,7 @@ class FakeLLMProvider:
     def __init__(self) -> None:
         self.system_prompt = ""
         self.rag_context = ""
+        self.temperature = None
 
     def generate_response(
         self,
@@ -48,6 +49,7 @@ class FakeLLMProvider:
     ) -> str:
         self.system_prompt = system_prompt
         self.rag_context = rag_context
+        self.temperature = temperature
         return "Returns are accepted within 30 days."
 
 
@@ -78,7 +80,7 @@ def test_chat_endpoint_combines_agent_identity_rag_and_sources() -> None:
         ).json()["id"]
         agent_id = client.post(
             "/api/agents",
-            json={"name": "Customer Agent", "nickname": "JARVIS", "persona_id": persona_id},
+            json={"name": "Customer Agent", "nickname": "JARVIS", "persona_id": persona_id, "temperature": 0.0},
         ).json()["id"]
 
         response = client.post(f"/api/agents/{agent_id}/chat", json={"message": "What is the return policy?"})
@@ -90,7 +92,9 @@ def test_chat_endpoint_combines_agent_identity_rag_and_sources() -> None:
     assert response.json()["sources"] == [
         {"document_id": "document-1", "filename": "returns.pdf", "page_number": 2, "chunk_index": 1}
     ]
+    assert llm_provider.temperature == 0.0
     assert "You are JARVIS." in llm_provider.system_prompt
+    assert "Always answer only from the retrieved knowledge." in llm_provider.system_prompt
     assert "BEGIN UNTRUSTED KNOWLEDGE" in llm_provider.rag_context
     assert inactive_response.status_code == 409
     assert inactive_response.json()["detail"] == "Agent is inactive"
