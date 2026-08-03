@@ -40,19 +40,25 @@ def test_agent_crud_and_persona_assignment_api() -> None:
                 "nickname": "JARVIS",
                 "description": "Handles customer questions.",
                 "persona_id": persona_id,
+                "max_tokens": 512,
+                "temperature": 0.3,
             },
         )
         assert created.status_code == 201
         agent_id = created.json()["id"]
         assert created.json()["persona_id"] == persona_id
         assert created.json()["status"] == "active"
+        assert created.json()["max_tokens"] == 512
+        assert created.json()["temperature"] == 0.3
 
         updated = client.put(
-            f"/api/agents/{agent_id}", json={"status": "inactive", "persona_id": None}
+            f"/api/agents/{agent_id}", json={"status": "inactive", "persona_id": None, "max_tokens": 1024, "temperature": 0.7}
         )
         assert updated.status_code == 200
         assert updated.json()["status"] == "inactive"
         assert updated.json()["persona_id"] is None
+        assert updated.json()["max_tokens"] == 1024
+        assert updated.json()["temperature"] == 0.7
 
         assert client.get("/api/agents").json()[0]["id"] == agent_id
         assert client.delete(f"/api/agents/{agent_id}").status_code == 204

@@ -47,5 +47,7 @@ def generate_response(
         system_prompt=system_prompt,
         user_message=message,
         rag_context=retrieved.context,
+        max_tokens=agent.max_tokens,
+        temperature=agent.temperature,
     )
     return ChatResult(answer=answer, sources=retrieved.sources)

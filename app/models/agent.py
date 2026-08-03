@@ -6,7 +6,7 @@ from datetime import datetime
 from typing import TYPE_CHECKING
 from uuid import uuid4
 
-from sqlalchemy import DateTime, ForeignKey, String, Text
+from sqlalchemy import DateTime, Float, ForeignKey, Integer, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core.database import Base
@@ -29,6 +29,8 @@ class Agent(Base):
     persona_id: Mapped[str | None] = mapped_column(
         ForeignKey("personas.id", ondelete="SET NULL"), nullable=True, index=True
     )
+    max_tokens: Mapped[int] = mapped_column(Integer, default=512, nullable=False)
+    temperature: Mapped[float] = mapped_column(Float, default=0.7, nullable=False)
     status: Mapped[str] = mapped_column(String(32), default="active", index=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now)
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now, onupdate=utc_now)

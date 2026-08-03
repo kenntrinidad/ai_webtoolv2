@@ -24,10 +24,14 @@ def test_openai_compatible_provider_keeps_message_boundaries() -> None:
         system_prompt="Trusted system instruction.",
         user_message="What is the return policy?",
         rag_context="[BEGIN UNTRUSTED KNOWLEDGE]\n30 days\n[END UNTRUSTED KNOWLEDGE]",
+        max_tokens=256,
+        temperature=0.3,
     )
 
     assert answer == "Verified answer."
     assert completions.request["model"] == "test-model"
+    assert completions.request["max_tokens"] == 256
+    assert completions.request["temperature"] == 0.3
     assert completions.request["messages"][0] == {"role": "system", "content": "Trusted system instruction."}
     assert "RETRIEVED KNOWLEDGE:" in completions.request["messages"][1]["content"]
     assert "USER MESSAGE:" in completions.request["messages"][1]["content"]

@@ -12,7 +12,15 @@ from app.core.config import Settings, get_settings
 class LLMProvider(Protocol):
     """Contract implemented by any chat-capable LLM provider."""
 
-    def generate_response(self, *, system_prompt: str, user_message: str, rag_context: str) -> str:
+    def generate_response(
+        self,
+        *,
+        system_prompt: str,
+        user_message: str,
+        rag_context: str,
+        max_tokens: int | None = None,
+        temperature: float | None = None,
+    ) -> str:
         """Generate a response from trusted instructions, retrieved data, and a user message."""
 
 
@@ -41,16 +49,29 @@ class OpenAICompatibleLLMProvider:
         self._client = client or OpenAI(**client_options)
         self._model = settings.llm_model
 
-    def generate_response(self, *, system_prompt: str, user_message: str, rag_context: str) -> str:
+    def generate_response(
+        self,
+        *,
+        system_prompt: str,
+        user_message: str,
+        rag_context: str,
+        max_tokens: int | None = None,
+        temperature: float | None = None,
+    ) -> str:
         """Request a completion while preserving system/user role separation."""
         try:
-            completion = self._client.chat.completions.create(
-                model=self._model,
-                messages=[
+            params: dict[str, Any] = {
+                "model": self._model,
+                "messages": [
                     {"role": "system", "content": system_prompt},
                     {"role": "user", "content": build_llm_input(user_message=user_message, rag_context=rag_context)},
                 ],
-            )
+            }
+            if max_tokens is not None:
+                params["max_tokens"] = max_tokens
+            if temperature is not None:
+                params["temperature"] = temperature
+            completion = self._client.chat.completions.create(**params)
             answer = completion.choices[0].message.content
         except Exception as error:
             raise LLMProviderError("LLM provider request failed") from error
@@ -62,7 +83,15 @@ class OpenAICompatibleLLMProvider:
 class MockLLMProvider:
     """In-memory LLM provider for local development and tests."""
 
-    def generate_response(self, *, system_prompt: str, user_message: str, rag_context: str) -> str:
+    def generate_response(
+        self,
+        *,
+        system_prompt: str,
+        user_message: str,
+        rag_context: str,
+        max_tokens: int | None = None,
+        temperature: float | None = None,
+    ) -> str:
         return f"[MOCK RESPONSE]\n{system_prompt}\n{rag_context}\nUSER MESSAGE:\n{user_message}"
 
 

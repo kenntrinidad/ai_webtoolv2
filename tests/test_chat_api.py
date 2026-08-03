@@ -37,7 +37,15 @@ class FakeLLMProvider:
         self.system_prompt = ""
         self.rag_context = ""
 
-    def generate_response(self, *, system_prompt: str, user_message: str, rag_context: str) -> str:
+    def generate_response(
+        self,
+        *,
+        system_prompt: str,
+        user_message: str,
+        rag_context: str,
+        max_tokens: int | None = None,
+        temperature: float | None = None,
+    ) -> str:
         self.system_prompt = system_prompt
         self.rag_context = rag_context
         return "Returns are accepted within 30 days."

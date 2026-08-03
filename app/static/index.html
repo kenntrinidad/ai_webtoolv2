@@ -72,6 +72,8 @@
               <label>Nickname<input name="nickname" maxlength="120" placeholder="JARVIS"></label>
               <label>Description<textarea name="description" maxlength="2000" placeholder="What does this agent do?"></textarea></label>
               <label>Persona<select name="persona_id" id="agent-persona-select"><option value="">No Persona assigned</option></select></label>
+              <label>Max Tokens<input name="max_tokens" type="number" min="1" max="32768" step="1" value="512"></label>
+              <label>Temperature<input name="temperature" type="number" min="0" max="2" step="0.1" value="0.7"></label>
               <label>Status<select name="status"><option value="active">Active</option><option value="inactive">Inactive</option></select></label>
               <div class="form-actions"><button class="primary" type="submit">Save Agent</button><button class="secondary" id="cancel-agent" type="button">Cancel</button></div>
             </form></article>
