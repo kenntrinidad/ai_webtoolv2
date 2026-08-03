@@ -40,6 +40,8 @@ USER MESSAGE:
 class OpenAICompatibleLLMProvider:
     """Chat Completions adapter for OpenAI and compatible providers."""
 
+    _fallback_models = ("gpt-4o-mini", "gpt-4.1-mini")
+
     def __init__(self, settings: Settings, client: Any | None = None) -> None:
         if not settings.openai_api_key:
             raise LLMProviderError("OPENAI_API_KEY is required to generate chat responses")
@@ -59,25 +61,35 @@ class OpenAICompatibleLLMProvider:
         temperature: float | None = None,
     ) -> str:
         """Request a completion while preserving system/user role separation."""
-        try:
-            params: dict[str, Any] = {
-                "model": self._model,
-                "messages": [
-                    {"role": "system", "content": system_prompt},
-                    {"role": "user", "content": build_llm_input(user_message=user_message, rag_context=rag_context)},
-                ],
-            }
-            if max_tokens is not None:
-                params["max_tokens"] = max_tokens
-            if temperature is not None:
-                params["temperature"] = temperature
-            completion = self._client.chat.completions.create(**params)
-            answer = completion.choices[0].message.content
-        except Exception as error:
-            raise LLMProviderError("LLM provider request failed") from error
-        if not answer or not answer.strip():
-            raise LLMProviderError("LLM provider returned an empty response")
-        return answer.strip()
+        models_to_try = [self._model]
+        for fallback_model in self._fallback_models:
+            if fallback_model not in models_to_try:
+                models_to_try.append(fallback_model)
+
+        last_error: Exception | None = None
+        for model_name in models_to_try:
+            try:
+                params: dict[str, Any] = {
+                    "model": model_name,
+                    "messages": [
+                        {"role": "system", "content": system_prompt},
+                        {"role": "user", "content": build_llm_input(user_message=user_message, rag_context=rag_context)},
+                    ],
+                }
+                if max_tokens is not None:
+                    params["max_tokens"] = max_tokens
+                if temperature is not None:
+                    params["temperature"] = temperature
+                completion = self._client.chat.completions.create(**params)
+                answer = completion.choices[0].message.content
+            except Exception as error:
+                last_error = error
+                continue
+            if not answer or not answer.strip():
+                raise LLMProviderError("LLM provider returned an empty response")
+            return answer.strip()
+
+        raise LLMProviderError("LLM provider request failed") from last_error
 
 
 class MockLLMProvider:

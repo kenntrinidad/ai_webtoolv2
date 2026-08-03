@@ -29,7 +29,7 @@ class Settings(BaseSettings):
     openai_base_url: str | None = None
     llm_provider: str = "openai"
     embedding_provider: str = "openai"
-    llm_model: str = "gpt-5-mini"
+    llm_model: str = "gpt-4o-mini"
     embedding_model: str = "text-embedding-3-small"
     initial_admin_username: str | None = None
     initial_admin_email: str | None = None

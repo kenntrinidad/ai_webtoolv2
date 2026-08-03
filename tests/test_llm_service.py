@@ -41,3 +41,33 @@ def test_llm_input_structures_rag_context_and_user_message() -> None:
     payload = build_llm_input(user_message="Hello", rag_context="No retrieved knowledge is available.")
 
     assert payload.endswith("USER MESSAGE:\nHello")
+
+
+class FallbackCompletions:
+    def __init__(self) -> None:
+        self.calls = []
+
+    def create(self, **kwargs):
+        self.calls.append(kwargs)
+        if kwargs["model"] == "gpt-5-mini":
+            raise RuntimeError("bad request")
+        return SimpleNamespace(choices=[SimpleNamespace(message=SimpleNamespace(content="Fallback answer."))])
+
+
+def test_provider_falls_back_to_supported_default_model_on_bad_request() -> None:
+    completions = FallbackCompletions()
+    client = SimpleNamespace(chat=SimpleNamespace(completions=completions))
+    provider = OpenAICompatibleLLMProvider(
+        Settings(openai_api_key="test-key", llm_model="gpt-5-mini"), client=client
+    )
+
+    answer = provider.generate_response(
+        system_prompt="Trusted system instruction.",
+        user_message="What is the return policy?",
+        rag_context="[BEGIN UNTRUSTED KNOWLEDGE]\n30 days\n[END UNTRUSTED KNOWLEDGE]",
+        max_tokens=256,
+        temperature=0.3,
+    )
+
+    assert answer == "Fallback answer."
+    assert [call["model"] for call in completions.calls] == ["gpt-5-mini", "gpt-4o-mini"]
