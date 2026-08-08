@@ -15,11 +15,13 @@ from starlette.middleware.sessions import SessionMiddleware
 from app.api.agents import router as agents_router
 from app.api.auth import router as auth_router
 from app.api.chat import router as chat_router
+from app.api.conversations import router as conversations_router
 from app.api.health import router as health_router
 from app.api.knowledge import router as knowledge_router
 from app.api.knowledge_sync import router as knowledge_sync_router
 from app.api.personas import router as personas_router
 from app.api.users import router as users_router
+from app.api.webhooks import config_router as webhook_config_router, public_router as webhook_public_router
 from app.core.config import get_settings
 from app.core.auth import require_password_change_complete
 from app.core.database import SessionLocal, init_database
@@ -98,7 +100,10 @@ def create_app() -> FastAPI:
     app.include_router(knowledge_router, prefix="/api", dependencies=protected)
     app.include_router(knowledge_sync_router, prefix="/api", dependencies=protected)
     app.include_router(chat_router, prefix="/api", dependencies=protected)
+    app.include_router(conversations_router, prefix="/api", dependencies=protected)
     app.include_router(users_router, prefix="/api", dependencies=protected)
+    app.include_router(webhook_config_router, prefix="/api", dependencies=protected)
+    app.include_router(webhook_public_router, prefix="/api")
     return app
 
 

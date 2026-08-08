@@ -1,3 +1,7 @@
+
+## To run python -m uvicorn ai_webtoolv2.app.main:app --host 127.0.0.1 --port 8000
+##URL http://127.0.0.1:8000
+
 # AI Agent Builder
 
 Local MVP for configuring AI agents, reusable personas, agent-specific knowledge, and RAG-backed chat. The MVP is complete through **Phase 15**, including security hardening, documentation, and deployment preparation.
@@ -134,3 +138,6 @@ Authenticated users can change their password through `POST /api/auth/change-pas
 
 The pre-existing root `main.py` is an earlier command-line prototype and is intentionally left untouched. The new application entry point is `app/main.py`.
 "# ai_webtoolv2" 
+
+## RAG persistence
+Synchronized chunks and embeddings are mirrored in the relational knowledge_chunks table for auditing and administration. Chroma remains the active retrieval engine, so behavior and retrieval performance are unchanged while PostgreSQL deployments retain a queryable record. SQLite stores the mirror embedding as JSON text; PostgreSQL can later migrate this column to pgvector without changing the sync contract.

@@ -45,23 +45,25 @@
           <button class="nav-link" data-view="personas">Personas</button>
           <button class="nav-link" data-view="knowledge">Knowledge</button>
           <button class="nav-link" data-view="chat">Chat</button>
+          <button class="nav-link" data-view="configuration">Configuration</button>
+          <button class="nav-link" data-view="conversations">Conversation</button>
         <button class="nav-link" data-view="users">Users</button>
         </nav>
-        <a class="docs-link" href="/docs" target="_blank" rel="noreferrer">API documentation ↗</a>
+        <a class="docs-link" href="/docs" target="_blank" rel="noreferrer">API documentation Ã¢â€ â€”</a>
       </aside>
       <main class="main-content">
         <header class="page-header">
           <div><p class="eyebrow">AI OPERATIONS</p><h1 id="page-title">Dashboard</h1></div>
-          <div class="header-actions"><span id="health-indicator" class="health">Checking service…</span><button id="logout-button" class="secondary" type="button">Sign out</button></div>
+          <div class="header-actions"><span id="health-indicator" class="health">Checking serviceÃ¢â‚¬Â¦</span><button id="logout-button" class="secondary" type="button">Sign out</button></div>
         </header>
 
         <section id="view-dashboard" class="view active">
           <div class="metric-grid">
-            <article class="metric"><span>Agents</span><strong id="agent-count">—</strong><small id="active-agent-count">— active</small></article>
-            <article class="metric"><span>Personas</span><strong id="persona-count">—</strong><small>Reusable instructions</small></article>
-            <article class="metric"><span>Knowledge</span><strong id="document-count">—</strong><small>Uploaded documents</small></article>
+            <article class="metric"><span>Agents</span><strong id="agent-count">Ã¢â‚¬â€</strong><small id="active-agent-count">Ã¢â‚¬â€ active</small></article>
+            <article class="metric"><span>Personas</span><strong id="persona-count">Ã¢â‚¬â€</strong><small>Reusable instructions</small></article>
+            <article class="metric"><span>Knowledge</span><strong id="document-count">Ã¢â‚¬â€</strong><small>Uploaded documents</small></article>
           </div>
-          <article class="panel hero-panel"><div><p class="eyebrow">START HERE</p><h2>Configure an AI agent</h2><p>Create a reusable Persona, attach it to an Agent, then upload and synchronize that Agent’s private knowledge.</p></div><button class="primary" data-view="agents">Create Agent</button></article>
+          <article class="panel hero-panel"><div><p class="eyebrow">START HERE</p><h2>Configure an AI agent</h2><p>Create a reusable Persona, attach it to an Agent, then upload and synchronize that AgentÃ¢â‚¬â„¢s private knowledge.</p></div><button class="primary" data-view="agents">Create Agent</button></article>
         </section>
 
         <section id="view-agents" class="view">
@@ -93,7 +95,7 @@
         </section>
 
         <section id="view-knowledge" class="view">
-          <div class="section-heading"><div><h2>Knowledge Base</h2><p>Upload documents and explicitly synchronize an Agent’s private knowledge.</p></div></div>
+          <div class="section-heading"><div><h2>Knowledge Base</h2><p>Upload documents and explicitly synchronize an AgentÃ¢â‚¬â„¢s private knowledge.</p></div></div>
           <article class="panel"><div class="toolbar"><label>Agent<select id="knowledge-agent-select"></select></label><button class="secondary" id="sync-knowledge">Sync Knowledge</button></div>
             <form id="upload-form" class="upload-row"><input type="file" name="file" required accept=".pdf,.txt,.md,.markdown,.docx"><button class="primary" type="submit">Upload Document</button></form>
             <div id="knowledge-status" class="status-copy"></div><div id="documents-list" class="document-list"></div>
@@ -101,14 +103,18 @@
         </section>
 
         <section id="view-chat" class="view">
-          <div class="section-heading"><div><h2>Agent Testing Playground</h2><p>Test an Agent’s identity, Persona, and synchronized knowledge.</p></div></div>
+          <div class="section-heading"><div><h2>Agent Testing Playground</h2><p>Test an AgentÃ¢â‚¬â„¢s identity, Persona, and synchronized knowledge.</p></div></div>
           <article class="panel chat-panel">
             <div class="chat-toolbar"><label>Testing Agent<select id="chat-agent-select"></select></label><div id="chat-agent-summary" class="status-copy"></div></div>
             <div id="chat-messages" class="chat-messages" aria-live="polite"></div>
-            <form id="chat-form" class="chat-input"><textarea name="message" required maxlength="10000" placeholder="Ask this Agent a question…"></textarea><button class="primary" type="submit"><span id="chat-send-text">Send</span><span id="chat-send-spinner" class="spinner hidden" aria-hidden="true"></span></button></form>
+            <form id="chat-form" class="chat-input"><textarea name="message" required maxlength="10000" placeholder="Ask this Agent a questionÃ¢â‚¬Â¦"></textarea><button class="primary" type="submit"><span id="chat-send-text">Send</span><span id="chat-send-spinner" class="spinner hidden" aria-hidden="true"></span></button></form>
           </article>
         </section>
-        <section id="view-users" class="view">
+        <section id="view-configuration" class="view">
+          <div class="section-heading"><div><h2>Configuration</h2><p>Assign each Agentâ€™s Persona, ready knowledge, and generation settings.</p></div></div>
+          <article class="panel form-panel"><form id="configuration-form"><label>Agent<select id="configuration-agent-select"></select></label><label>Persona<select name="persona_id" id="configuration-persona-select"></select></label><label>Knowledge Base<select name="knowledge_document_id" id="configuration-document-select"></select></label><label>Temperature <output id="configuration-temperature-value">0.7</output><input name="temperature" id="configuration-temperature" type="range" min="0" max="2" step="0.1" value="0.7"></label><label>Max response tokens<input name="max_tokens" type="number" min="1" max="32768" value="512"></label><div class="form-actions"><button class="primary" type="submit">Save configuration</button></div></form><hr><h3>Chat API &amp; Messenger webhook</h3><div id="chat-api-details" class="status-copy"></div><form id="webhook-form"><label>Verify Token<input name="verify_token" type="password" minlength="8" placeholder="Set or rotate token"></label><label>Facebook Page Access Token<input name="page_access_token" type="password" placeholder="Set or rotate token"></label><label>Facebook Page ID<input name="page_id" placeholder="Optional Page ID"></label><div class="form-actions"><button class="secondary" type="submit">Save webhook setup</button></div></form></article>
+        </section>
+        <section id="view-conversations" class="view"><div class="section-heading"><div><h2>Conversation</h2><p>Recorded threads and their actual message origins.</p></div></div><div class="two-column"><article class="panel list-panel"><label>Agent<select id="conversation-agent-select"></select></label><div id="conversations-list" class="item-list"></div></article><article class="panel"><div id="conversation-thread" class="chat-messages"><div class="empty">Select a conversation to view its messages.</div></div></article></div></section>        <section id="view-users" class="view">
           <div class="section-heading"><div><h2>Users</h2><p>Manage administrator and regular workspace users.</p></div><button class="primary" id="new-user">New User</button></div>
           <div class="two-column">
             <article class="panel list-panel"><div id="users-list" class="item-list"></div></article>

@@ -14,6 +14,7 @@ from sqlalchemy.orm import Session
 from app.models import KnowledgeDocument
 from app.services.embedding_service import EmbeddingProvider
 from app.services.ingestion_service import prepare_document
+from app.services.knowledge_chunk_service import delete_document_chunks, replace_document_chunks
 from app.services.vector_store_service import AgentVectorStore
 
 logger = logging.getLogger(__name__)
@@ -76,6 +77,7 @@ def synchronize_agent_knowledge(
             if changed:
                 _set_document_status(db, document, "outdated")
                 vector_store.delete_document_vectors(agent_id, document.id)
+                delete_document_chunks(db, document.id)
                 document.checksum = checksum
                 document.file_size = file_size
                 db.commit()
@@ -87,6 +89,7 @@ def synchronize_agent_knowledge(
             vector_store.add_document_chunks(
                 agent_id=agent_id, document=document, chunks=chunks, embeddings=embeddings
             )
+            replace_document_chunks(db, agent_id=agent_id, document=document, chunks=chunks, embeddings=embeddings)
             document.sync_status = "synced"
             document.last_synced_at = datetime.now(timezone.utc)
             db.commit()

@@ -43,6 +43,12 @@ def _ensure_agent_columns() -> None:
             connection.execute(text("ALTER TABLE agents ADD COLUMN max_tokens INTEGER NOT NULL DEFAULT 512"))
         if "temperature" not in existing_columns:
             connection.execute(text("ALTER TABLE agents ADD COLUMN temperature FLOAT NOT NULL DEFAULT 0.7"))
+        if "knowledge_document_id" not in existing_columns:
+            connection.execute(text("ALTER TABLE agents ADD COLUMN knowledge_document_id VARCHAR(36)"))
+        if "conversation_messages" in inspector.get_table_names():
+            message_columns = {column["name"] for column in inspector.get_columns("conversation_messages")}
+            if "sender_origin" not in message_columns:
+                connection.execute(text("ALTER TABLE conversation_messages ADD COLUMN sender_origin VARCHAR(64) NOT NULL DEFAULT 'playground'"))
 
 
 def init_database() -> None:

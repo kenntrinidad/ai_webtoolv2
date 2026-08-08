@@ -36,4 +36,4 @@ class KnowledgeDocument(Base):
     uploaded_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now)
     last_synced_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
-    agent: Mapped["Agent"] = relationship(back_populates="documents")
+    agent: Mapped["Agent"] = relationship(back_populates="documents", foreign_keys=[agent_id])

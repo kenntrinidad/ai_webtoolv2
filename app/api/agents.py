@@ -5,7 +5,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
-from app.models import Persona
+from app.models import KnowledgeDocument, Persona
 from app.schemas.agent import AgentCreate, AgentRead, AgentUpdate
 from app.services import agent_service
 
@@ -22,6 +22,13 @@ def _require_agent(db: Session, agent_id: str):
 def _validate_persona_assignment(db: Session, persona_id: str | None) -> None:
     if persona_id is not None and db.get(Persona, persona_id) is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Persona not found")
+
+
+def _validate_knowledge_assignment(db: Session, agent_id: str, document_id: str | None) -> None:
+    if document_id is not None:
+        document = db.get(KnowledgeDocument, document_id)
+        if document is None or document.agent_id != agent_id:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Knowledge document not found")
 
 
 @router.post("", response_model=AgentRead, status_code=status.HTTP_201_CREATED)
@@ -53,6 +60,8 @@ def update_agent(agent_id: str, payload: AgentUpdate, db: Session = Depends(get_
     agent = _require_agent(db, agent_id)
     if "persona_id" in payload.model_fields_set:
         _validate_persona_assignment(db, payload.persona_id)
+    if "knowledge_document_id" in payload.model_fields_set:
+        _validate_knowledge_assignment(db, agent_id, payload.knowledge_document_id)
     try:
         return agent_service.update_agent(db, agent, payload)
     except IntegrityError as error:

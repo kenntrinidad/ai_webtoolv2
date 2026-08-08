@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 
 from app.core.database import get_db
 from app.schemas.chat import ChatRequest, ChatResponse, ChatSource
-from app.services import agent_service, chat_service
+from app.services import agent_service, chat_service, conversation_service
 from app.services.embedding_service import EmbeddingProvider, EmbeddingProviderError, get_embedding_provider
 from app.services.llm_service import LLMProvider, LLMProviderError, get_llm_provider
 from app.services.vector_store_service import AgentVectorStore, VectorStoreError, get_vector_store
@@ -27,6 +27,7 @@ def chat_with_agent(
     if agent is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Agent not found")
     try:
+        conversation = conversation_service.record_user_message(db, agent=agent, conversation_id=payload.conversation_id, content=payload.message, sender_type=payload.sender_type, sender_origin=payload.sender_origin)
         result = chat_service.generate_response(
             db,
             agent=agent,
@@ -35,11 +36,15 @@ def chat_with_agent(
             vector_store=vector_store,
             llm_provider=llm_provider,
         )
+    except ValueError as error:
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail="Invalid conversation") from error
     except chat_service.AgentInactiveError as error:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Agent is inactive") from error
     except (EmbeddingProviderError, LLMProviderError, VectorStoreError):
         raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail="AI service is unavailable")
+    conversation_service.record_agent_message(db, conversation=conversation, content=result.answer, sources=result.sources)
     return ChatResponse(
         answer=result.answer,
         sources=[ChatSource(**source.__dict__) for source in result.sources],
+        conversation_id=conversation.id,
     )

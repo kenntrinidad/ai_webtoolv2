@@ -13,6 +13,8 @@ from app.core.database import Base
 from app.models.persona import utc_now
 
 if TYPE_CHECKING:
+    from app.models.conversation import Conversation
+    from app.models.conversation import Conversation
     from app.models.document import KnowledgeDocument
     from app.models.persona import Persona
 
@@ -29,6 +31,9 @@ class Agent(Base):
     persona_id: Mapped[str | None] = mapped_column(
         ForeignKey("personas.id", ondelete="SET NULL"), nullable=True, index=True
     )
+    knowledge_document_id: Mapped[str | None] = mapped_column(
+        ForeignKey("knowledge_documents.id", ondelete="SET NULL"), nullable=True, index=True
+    )
     max_tokens: Mapped[int] = mapped_column(Integer, default=512, nullable=False)
     temperature: Mapped[float] = mapped_column(Float, default=0.7, nullable=False)
     status: Mapped[str] = mapped_column(String(32), default="active", index=True)
@@ -37,5 +42,8 @@ class Agent(Base):
 
     persona: Mapped["Persona | None"] = relationship(back_populates="agents")
     documents: Mapped[list["KnowledgeDocument"]] = relationship(
-        back_populates="agent", cascade="all, delete-orphan", passive_deletes=True
+        back_populates="agent", cascade="all, delete-orphan", passive_deletes=True,
+        foreign_keys="KnowledgeDocument.agent_id",
     )
+    knowledge_document: Mapped["KnowledgeDocument | None"] = relationship(foreign_keys=[knowledge_document_id], post_update=True)
+    conversations: Mapped[list["Conversation"]] = relationship(back_populates="agent", cascade="all, delete-orphan", passive_deletes=True)
