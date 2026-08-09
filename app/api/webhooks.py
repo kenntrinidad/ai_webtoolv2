@@ -1,6 +1,53 @@
+"""Authenticated configuration and token-verified Messenger ingress."""
 import httpx
+from fastapi import APIRouter, Depends, HTTPException, Query, Request, Response, status
+from sqlalchemy.orm import Session
+from app.core.database import get_db
+from app.models import AgentWebhookConfig
+from app.schemas.webhook import WebhookConfigRead, WebhookConfigUpdate
+from app.services import agent_service, chat_service, conversation_service
+from app.services.embedding_service import EmbeddingProvider, get_embedding_provider
+from app.services.llm_service import LLMProvider, get_llm_provider
+from app.services.vector_store_service import AgentVectorStore, get_vector_store
+
+config_router = APIRouter(prefix="/agents/{agent_id}/webhook", tags=["webhooks"])
+public_router = APIRouter(prefix="/webhooks/{agent_id}/messenger", tags=["webhooks"])
 
 FB_GRAPH_URL = "https://graph.facebook.com/v21.0/me/messages"
+
+
+def mask(value: str | None) -> str | None:
+    return None if not value else "•" * max(0, len(value)-4) + value[-4:]
+
+
+def read_config(request: Request, agent_id: str, config: AgentWebhookConfig | None) -> WebhookConfigRead:
+    return WebhookConfigRead(callback_url=str(request.base_url).rstrip("/") + f"/api/webhooks/{agent_id}/messenger", configured=config is not None, verify_token_masked=mask(config.verify_token) if config else None, page_access_token_masked=mask(config.page_access_token) if config else None, page_id=config.page_id if config else None)
+
+
+@config_router.get("", response_model=WebhookConfigRead)
+def get_config(agent_id: str, request: Request, db: Session = Depends(get_db)):
+    if agent_service.get_agent(db, agent_id) is None: raise HTTPException(404, "Agent not found")
+    return read_config(request, agent_id, db.query(AgentWebhookConfig).filter_by(agent_id=agent_id).one_or_none())
+
+
+@config_router.put("", response_model=WebhookConfigRead)
+def put_config(agent_id: str, payload: WebhookConfigUpdate, request: Request, db: Session = Depends(get_db)):
+    if agent_service.get_agent(db, agent_id) is None: raise HTTPException(404, "Agent not found")
+    config = db.query(AgentWebhookConfig).filter_by(agent_id=agent_id).one_or_none()
+    if config is None:
+        if not payload.verify_token: raise HTTPException(status.HTTP_422_UNPROCESSABLE_CONTENT, "Verify token is required")
+        config=AgentWebhookConfig(agent_id=agent_id, verify_token=payload.verify_token); db.add(config)
+    for key, value in payload.model_dump(exclude_unset=True).items():
+        if value is not None: setattr(config, key, value)
+    db.commit(); db.refresh(config)
+    return read_config(request, agent_id, config)
+
+
+@public_router.get("")
+def verify(agent_id: str, hub_mode: str = Query(alias="hub.mode"), hub_verify_token: str = Query(alias="hub.verify_token"), hub_challenge: str = Query(alias="hub.challenge"), db: Session = Depends(get_db)):
+    config=db.query(AgentWebhookConfig).filter_by(agent_id=agent_id).one_or_none()
+    if not config or hub_mode != "subscribe" or hub_verify_token != config.verify_token: raise HTTPException(403, "Webhook verification failed")
+    return Response(content=hub_challenge, media_type="text/plain")
 
 
 async def send_messenger_reply(page_access_token: str, recipient_id: str, text: str) -> None:
