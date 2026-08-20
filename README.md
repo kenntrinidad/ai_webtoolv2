@@ -1,5 +1,6 @@
 
-## To run python -m uvicorn ai_webtoolv2.app.main:app --host 127.0.0.1 --port 8000
+## cd "C:\Business Projects\Software Development Projects\ai_webtool\ai_webtoolv2"
+#python -m uvicorn app.main:app --host 127.0.0.1 --port 8000
 ##URL http://127.0.0.1:8000
 
 # AI Agent Builder

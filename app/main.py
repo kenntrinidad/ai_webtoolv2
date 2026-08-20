@@ -27,6 +27,8 @@ from app.core.auth import require_password_change_complete
 from app.core.database import SessionLocal, init_database
 from app.core.security import add_security_headers
 from app.services.user_service import bootstrap_initial_admin
+from fastapi.staticfiles import StaticFiles
+from fastapi.middleware.cors import CORSMiddleware
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s")
 logger = logging.getLogger(__name__)
@@ -51,6 +53,17 @@ def create_app() -> FastAPI:
     settings = get_settings()
     # Keep debug pages disabled even in development so API clients never receive stack traces.
     app = FastAPI(title=settings.app_name, debug=False, lifespan=lifespan)
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=[
+            "http://127.0.0.1:5500",
+            "http://localhost:5500",
+        ],
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )   
+    app.mount("/static", StaticFiles(directory="app/static"), name="static")
     session_secret = settings.session_secret_key.get_secret_value() if settings.session_secret_key else None
     if not session_secret:
         if settings.app_env.lower() == "production":

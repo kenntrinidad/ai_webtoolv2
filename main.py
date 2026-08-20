@@ -5,7 +5,7 @@ from openai import OpenAI
 
 load_dotenv() # Ito ay para mag load environment variables
 
-api_key = os.getenv("OPENAI_API_KEY")
+api_key = os.getenv("GOOGLE_API_KEY")  # Palitan ng iyong OpenAI API key
 
 if not api_key:
     raise ValueError("OPENAI_API_KEY is not configured")
