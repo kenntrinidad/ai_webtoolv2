@@ -41,5 +41,6 @@ class AgentRead(BaseModel):
     max_tokens: int
     temperature: float
     status: AgentStatus
+    public_widget_token: str
     created_at: datetime
     updated_at: datetime

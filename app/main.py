@@ -20,6 +20,7 @@ from app.api.health import router as health_router
 from app.api.knowledge import router as knowledge_router
 from app.api.knowledge_sync import router as knowledge_sync_router
 from app.api.personas import router as personas_router
+from app.api.public_chat import router as public_chat_router
 from app.api.users import router as users_router
 from app.api.webhooks import config_router as webhook_config_router, public_router as webhook_public_router
 from app.core.config import get_settings
@@ -56,8 +57,7 @@ def create_app() -> FastAPI:
     app.add_middleware(
         CORSMiddleware,
         allow_origins=[
-            "http://127.0.0.1:5500",
-            "http://localhost:5500",
+            *settings.widget_allowed_origins,
         ],
         allow_credentials=True,
         allow_methods=["*"],
@@ -113,6 +113,7 @@ def create_app() -> FastAPI:
     app.include_router(knowledge_router, prefix="/api", dependencies=protected)
     app.include_router(knowledge_sync_router, prefix="/api", dependencies=protected)
     app.include_router(chat_router, prefix="/api", dependencies=protected)
+    app.include_router(public_chat_router, prefix="/api")
     app.include_router(conversations_router, prefix="/api", dependencies=protected)
     app.include_router(users_router, prefix="/api", dependencies=protected)
     app.include_router(webhook_config_router, prefix="/api", dependencies=protected)

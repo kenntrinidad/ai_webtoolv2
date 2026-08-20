@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from datetime import datetime
 from typing import TYPE_CHECKING
+from secrets import token_urlsafe
 from uuid import uuid4
 
 from sqlalchemy import DateTime, Float, ForeignKey, Integer, String, Text
@@ -37,6 +38,9 @@ class Agent(Base):
     max_tokens: Mapped[int] = mapped_column(Integer, default=512, nullable=False)
     temperature: Mapped[float] = mapped_column(Float, default=0.7, nullable=False)
     status: Mapped[str] = mapped_column(String(32), default="active", index=True)
+    public_widget_token: Mapped[str] = mapped_column(
+        String(64), unique=True, index=True, default=lambda: token_urlsafe(32), nullable=False
+    )
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now)
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now, onupdate=utc_now)
 
