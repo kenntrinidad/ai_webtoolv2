@@ -4,14 +4,15 @@
   const config = {
     agentId: script?.dataset.agentId || "",
     webhookUrl: script?.dataset.webhookUrl || "",
+    widgetToken: script?.dataset.widgetToken || "",
     title: script?.dataset.title || "Chat with us",
     color: script?.dataset.primaryColor || "#2563eb",
     welcomeMessage: "Hi! How can I help you today?"
   };
 
   function startWidget() {
-    if (!config.webhookUrl) {
-      console.error("AI Chat Widget: data-webhook-url is required.");
+    if (!config.webhookUrl || !config.widgetToken) {
+      console.error("AI Chat Widget: data-webhook-url and data-widget-token are required.");
       return;
     }
 
@@ -109,13 +110,16 @@
       try {
         const response = await fetch(config.webhookUrl, {
           method: "POST",
-          credentials: "include",
-          headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
+          headers: {
+            "Content-Type": "application/json",
+            "X-Widget-Token": config.widgetToken
+          },
+          body: JSON.stringify({
             message: userMessage,
-            agent_id: config.agentId,
-            session_id: crypto.randomUUID?.() || String(Date.now())
-            })
+            conversation_id: sessionStorage.getItem(`ai-chat-conversation-${config.agentId}`),
+            sender_type: "api",
+            sender_origin: "website-widget"
+          })
         });
 
         if (!response.ok) {
@@ -124,6 +128,10 @@
 
         const data = await response.json();
         console.log("Chat response:", data);
+
+        if (data.conversation_id) {
+          sessionStorage.setItem(`ai-chat-conversation-${config.agentId}`, data.conversation_id);
+        }
 
         replyElement.textContent =
             data.answer ||

@@ -1,6 +1,7 @@
 """SQLAlchemy engine, session dependency, and schema initialization."""
 
 from collections.abc import Generator
+from secrets import token_urlsafe
 
 from sqlalchemy import create_engine, inspect, text
 from sqlalchemy.engine import Engine
@@ -45,6 +46,17 @@ def _ensure_agent_columns() -> None:
             connection.execute(text("ALTER TABLE agents ADD COLUMN temperature FLOAT NOT NULL DEFAULT 0.7"))
         if "knowledge_document_id" not in existing_columns:
             connection.execute(text("ALTER TABLE agents ADD COLUMN knowledge_document_id VARCHAR(36)"))
+        if "public_widget_token" not in existing_columns:
+            connection.execute(text("ALTER TABLE agents ADD COLUMN public_widget_token VARCHAR(64)"))
+            agent_ids = connection.execute(text("SELECT id FROM agents")).scalars().all()
+            for agent_id in agent_ids:
+                connection.execute(
+                    text("UPDATE agents SET public_widget_token = :token WHERE id = :agent_id"),
+                    {"token": token_urlsafe(32), "agent_id": agent_id},
+                )
+            connection.execute(
+                text("CREATE UNIQUE INDEX IF NOT EXISTS ix_agents_public_widget_token ON agents (public_widget_token)")
+            )
         if "conversation_messages" in inspector.get_table_names():
             message_columns = {column["name"] for column in inspector.get_columns("conversation_messages")}
             if "sender_origin" not in message_columns:

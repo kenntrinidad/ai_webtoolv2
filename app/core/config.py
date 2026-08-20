@@ -40,6 +40,11 @@ class Settings(BaseSettings):
     login_max_attempts: int = Field(default=5, ge=1, le=20)
     login_attempt_window_seconds: int = Field(default=900, ge=60, le=86_400)
     login_lockout_seconds: int = Field(default=900, ge=60, le=86_400)
+    widget_allowed_origins: tuple[str, ...] = (
+        "http://127.0.0.1:5500",
+        "http://localhost:5500",
+    )
+    widget_requests_per_minute: int = Field(default=20, ge=1, le=1_000)
 
     @field_validator("allowed_document_extensions", mode="before")
     @classmethod
@@ -47,6 +52,13 @@ class Settings(BaseSettings):
         if isinstance(value, str):
             return tuple(item.strip().lower() for item in value.split(",") if item.strip())
         return tuple(item.lower() for item in value)
+
+    @field_validator("widget_allowed_origins", mode="before")
+    @classmethod
+    def parse_widget_origins(cls, value: str | tuple[str, ...]) -> tuple[str, ...]:
+        if isinstance(value, str):
+            return tuple(item.strip().rstrip("/") for item in value.split(",") if item.strip())
+        return tuple(item.rstrip("/") for item in value)
 
     @field_validator("llm_provider", "embedding_provider", mode="before")
     @classmethod
