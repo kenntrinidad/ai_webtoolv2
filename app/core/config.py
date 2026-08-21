@@ -6,6 +6,8 @@ from pathlib import Path
 from pydantic import Field, SecretStr, field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
+from typing import Annotated
+
 
 class Settings(BaseSettings):
     """Configuration loaded from environment variables and an optional .env file."""
@@ -40,7 +42,7 @@ class Settings(BaseSettings):
     login_max_attempts: int = Field(default=5, ge=1, le=20)
     login_attempt_window_seconds: int = Field(default=900, ge=60, le=86_400)
     login_lockout_seconds: int = Field(default=900, ge=60, le=86_400)
-    widget_allowed_origins: tuple[str, ...] = (
+    widget_allowed_origins: Annotated[tuple[str, ...], NoDecode] = (
         "https://tritechbusinesssolutions.com",
         "https://www.tritechbusinesssolutions.com",
     )
