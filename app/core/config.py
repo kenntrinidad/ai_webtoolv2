@@ -41,8 +41,8 @@ class Settings(BaseSettings):
     login_attempt_window_seconds: int = Field(default=900, ge=60, le=86_400)
     login_lockout_seconds: int = Field(default=900, ge=60, le=86_400)
     widget_allowed_origins: tuple[str, ...] = (
-        "http://127.0.0.1:5500",
-        "http://localhost:5500",
+        "https://tritechbusinesssolutions.com",
+        "https://www.tritechbusinesssolutions.com",
     )
     widget_requests_per_minute: int = Field(default=20, ge=1, le=1_000)
 
