@@ -1,6 +1,7 @@
 
 ## cd "C:\Business Projects\Software Development Projects\ai_webtool\ai_webtoolv2"
 #python -m uvicorn app.main:app --host 127.0.0.1 --port 8000
+python -m uvicorn app.main:app --reload
 ##URL http://127.0.0.1:8000
 
 # AI Agent Builder
@@ -142,3 +143,13 @@ The pre-existing root `main.py` is an earlier command-line prototype and is inte
 
 ## RAG persistence
 Synchronized chunks and embeddings are mirrored in the relational knowledge_chunks table for auditing and administration. Chroma remains the active retrieval engine, so behavior and retrieval performance are unchanged while PostgreSQL deployments retain a queryable record. SQLite stores the mirror embedding as JSON text; PostgreSQL can later migrate this column to pgvector without changing the sync contract.
+
+# Widget Input Script
+  <script
+      src="https://ai-webtoolv2.onrender.com/static/chat-widget.js"
+      data-agent-id="3ec98296-ff76-4d58-895c-bc053c3b33bc"
+      data-widget-token="085_FtzE3lcmSLTyWgMtMOBAMZR2gETBvI2GFQvyE44"
+      data-webhook-url="https://ai-webtoolv2.onrender.com/api/public/agents/3ec98296-ff76-4d58-895c-bc053c3b33bc/chat">
+  </script>
+
+Before embedding the widget on another site, add that site's exact origin to `WIDGET_ALLOWED_ORIGINS` in `.env`, separated by commas, then restart the app. An origin is the scheme, hostname, and optional port only (for example `https://shop.example.com` or `http://localhost:3000`); do not include a page path or trailing slash. This allowlist is used for both the CORS preflight and widget request validation. A `400 Bad Request` on `OPTIONS /api/public/agents/.../chat` means the requesting page's `Origin` is missing from this setting.
